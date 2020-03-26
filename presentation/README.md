@@ -1,5 +1,7 @@
 # Presentation module
 
+**Note** Before using this module, have a look to the easyPresentation module. It may be easier to use despite it requires more libraries (including this module).
+
 ## Description
 
 The presentation module allows the easy creation of revealjs presentations from text, markdown or image files defining the slides.  

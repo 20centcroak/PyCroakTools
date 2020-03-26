@@ -43,6 +43,8 @@ class Generator(Settings):
 
         - createWorkflowPresentation: if True, a unique presentation is generated to represent the workflow. Each slide may have multiple next slides. 
         Then links give choices to follow a path or another in the workflow
+
+        - displayTitles: if true, each slide displays its title
         """
 
         self.slideFolder = None
@@ -52,7 +54,8 @@ class Generator(Settings):
         self.versions = [0.]
         self.createFlowchart = False
         self.createLinearPresentations = False
-        self.createWorkflowPresentation = True        
+        self.createWorkflowPresentation = True
+        self.displayTitles = False   
         self.setProperties(settings)
 
         self._build()
@@ -70,7 +73,7 @@ class Generator(Settings):
         slides.catalog(self.imageFolder, images=True)
 
     def _manageSlides(self):
-        slides = Slides()
+        slides = Slides(self.displayTitles)
         if self.slideFolder:
             slides.catalog(self.slideFolder)
         else:

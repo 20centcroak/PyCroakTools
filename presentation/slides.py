@@ -24,7 +24,7 @@ class Slides:
     The slides may be built thanks to images. Image names should comply with the same rule given for markdown file names.
     """
 
-    def __init__(self):
+    def __init__(self, displayTitles=False):
         """builds the object"""
         self.slides = dict()
         """self.slides is a dictionary with key = slide id and value is the version dictionary.
@@ -32,6 +32,8 @@ class Slides:
         The part dictionary is defined by key = slide part number and value = Slide object"""
         self.versions = [0]
         """references in a sorted list the different available versions. Some version may be only available for one or more slides."""
+        self.displayTitles = displayTitles
+        """if True, the slide title is displayedin slides"""
 
     def catalog(self, folder:str, images=False):
         """
@@ -81,10 +83,10 @@ class Slides:
             if self.getSlide(slideId, self.getHighestVersion()):
                 continue
             title = 'slide {}'.format(slideId)
-            slide = Slide(id, title)
+            slide = Slide(slideId, title)
             slide.setContent('# '+title)
             self.addSlide(slide)
-            logging.info('slide {} {} created'.format(id, title))
+            logging.info('slide {} {} created'.format(slideId, title))
 
     def getDefaultSlideOrder(self):
         return list(self.slides.keys())
@@ -153,7 +155,7 @@ class Slides:
             if slide is None:
                 contents.append(
                     'slide {} part {} is missing.'.format(slideId, part))
-            contents.append(slidePart.getContent())
+            contents.append(slidePart.getContent(self.displayTitles))
         return contents
 
     def getMarkdownLinks(self, links, version=0):

@@ -7,12 +7,10 @@ import sys
 class Configuration:
 
     def default(self, file):
-        appName = os.path.basename(file)[:-3]
-        self.defaultLogger(appName)
-        return self.appConfig(appName)
+        self.defaultLogger(file)
+        return self.appConfig(file)
 
-    def appConfig(self, appName):
-        filename = appName+'.yml'
+    def appConfig(self, filename):
         try:            
             with open(filename) as file:
                 logging.info('config {} loaded'.format(filename))
@@ -21,8 +19,8 @@ class Configuration:
             logging.info('file {} not found, no config loaded'.format(filename))
             return
 
-    def defaultLogger(self, appName):
-        dirName = 'logs/'+appName
+    def defaultLogger(self, filename):
+        dirName = 'logs/'+os.path.basename(filename)
         if not os.path.exists(dirName):
             os.makedirs(dirName)
 

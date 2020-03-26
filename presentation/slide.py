@@ -65,7 +65,7 @@ class Slide:
             content += group
         return content
 
-    def _getImageContent(self, addTitle):
+    def _getImageContent(self):
         # def createImageSlideContent(self, slides, outputFolder, image):
         imageLink = os.path.basename(os.path.dirname(
             self.filename))+'/'+os.path.basename(self.filename)
@@ -78,9 +78,9 @@ class Slide:
         content = self.content
         if self.filename:
             if self.isImage:
-                content = self._getImageContent(addTitle)
+                content = self._getImageContent()
             else:
-                content = self._getFileContent(addTitle)
+                content = self._getFileContent()
 
         if addTitle or not content:
             self._addTitle(content)
