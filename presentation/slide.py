@@ -4,6 +4,7 @@ import logging
 import re
 import sys
 import os
+from pycroaktools.applauncher.configuration import Configuration
 
 
 class Slide:
@@ -52,9 +53,8 @@ class Slide:
             with open(self.filename) as file:
                 data = file.read()
         except FileNotFoundError:
-            message = 'file {} not found'.format(self.filename)
-            logging.error(message)
-            sys.exit(message)
+            Configuration().error('file {} not found'.format(self.filename))
+
         groups = re.split('---+', data)
 
         if len(groups) < 2:

@@ -61,8 +61,10 @@ class WorkflowToPresentation:
 
         for index, path in enumerate(paths):
             slideIds = [step.id for step in path]
-            Presentation().createPresentation(
+            presentation = Presentation().createPresentation(
                 presNames[index], self.slides, slideIds, self.outputFolder, version=version)
+
+        return presentation
 
     def createWorkflowPresentation(self, version):
         """
@@ -77,5 +79,5 @@ class WorkflowToPresentation:
         slideIds = [step.id for step in self.workflow.getSteps()]
         links = self.workflow.getLinksPerSteps()
 
-        Presentation().createPresentation(presName, self.slides, slideIds, self.outputFolder,
+        return Presentation().createPresentation(presName, self.slides, slideIds, self.outputFolder,
                                           links, version)

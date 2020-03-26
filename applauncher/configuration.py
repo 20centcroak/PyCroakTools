@@ -19,6 +19,11 @@ class Configuration:
             logging.info('file {} not found, no config loaded'.format(filename))
             return
 
+    def error(self, message):
+        logging.error(message)
+        input("press enter to close...")
+        sys.exit(message)
+
     def defaultLogger(self, filename):
         dirName = 'logs/'+os.path.basename(filename)
         if not os.path.exists(dirName):

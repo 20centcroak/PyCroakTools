@@ -1,5 +1,7 @@
 import logging
 import os
+import sys
+import webbrowser
 import pandas as pd
 from distutils.dir_util import copy_tree
 from pycroaktools.applauncher.settings import Settings
@@ -9,7 +11,7 @@ from pycroaktools.workflow.workflow import Workflow
 from pycroaktools.workflow.flowchart import Flowchart
 from pycroaktools.easyPresentation.slidesToWorkflow import SlidesToWorkflow
 from pycroaktools.easyPresentation.workflowToPresentation import WorkflowToPresentation
-
+from pycroaktools.applauncher.configuration import Configuration
 
 class Generator(Settings):
     """
@@ -65,7 +67,15 @@ class Generator(Settings):
         self._manageImages(slides)
         workflow = self._manageWorkflow(slides)
         self._manageMissingSlides(slides, workflow)
-        self._generate(workflow, slides)
+        pres = self._generate(workflow, slides)
+        self.open(pres)
+
+    def open(self, filename):
+        if not filename:
+            return
+        new = 2
+        url = "file:///"+filename
+        webbrowser.open(url,new=new)
 
     def _manageImages(self, slides: Slides):
         if not self.imageFolder:
@@ -83,8 +93,11 @@ class Generator(Settings):
 
     def _manageWorkflow(self, slides: Slides):
         if self.workflowFile:
-            return Workflow(pd.read_csv(
-                self.workflowFile), os.path.basename(self.workflowFile)[:-4])
+            try:
+                return Workflow(pd.read_csv(
+                    self.workflowFile), os.path.basename(self.workflowFile)[:-4])
+            except FileNotFoundError:
+                Configuration().error('file {} not found'.format(self.workflowFile))
 
         return Workflow(SlidesToWorkflow().create(slides), 'presentation')
 
@@ -100,6 +113,7 @@ class Generator(Settings):
             if self.createFlowchart:
                 Flowchart(workflow).display()
             if self.createLinearPresentations:
-                toPres.createLinearPresentations(version)
+                presentation = toPres.createLinearPresentations(version)
             if self.createWorkflowPresentation:
-                toPres.createWorkflowPresentation(version)
+                presentation = toPres.createWorkflowPresentation(version)
+            return presentation

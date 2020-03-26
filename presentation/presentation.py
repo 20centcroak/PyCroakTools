@@ -27,7 +27,7 @@ class Presentation:
         - links: dictionary with key = current slideId and values = next slideIds to be linked to current slideId
         - version: version of the presentation (float) = version of the slides if available or previous version if not. Default value is 0.0
         """
-        logging.info('create presentation {} '.format(presName))
+        logging.info('create presentation {} '.format(os.path.join(outputFolder, presName)))
         if not outputFolder:
             outputFolder = os.getcwd()
         self._copyLibs(outputFolder)
@@ -51,6 +51,8 @@ class Presentation:
                 self._writeMarkdownSection(output,
                                            slides.getSlideContents(slideId, version), htmlLinks)
             self._copyInOutput(output, asset2)
+
+        return file
 
     def _copyLibs(self, outputFolder):
         logging.info('copying libs...')

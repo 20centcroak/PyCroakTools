@@ -1,8 +1,8 @@
-from pycroaktools.workflow.step import Step
 import logging
 from pandas import DataFrame
 import sys
-
+from pycroaktools.workflow.step import Step
+from pycroaktools.applauncher.configuration import Configuration
 
 class Workflow:
     """
@@ -48,9 +48,7 @@ class Workflow:
             try:
                 id = int(stepId)
             except ValueError:
-                message = 'step id {} is not an integer'.format(stepId)
-                logging.error(message)
-                sys.exit(message)
+                Configuration().error('step id {} is not an integer'.format(stepId))
             step = Step(id)
             self.steps[stepId] = step
 
@@ -62,9 +60,7 @@ class Workflow:
                 except ValueError:
                     if not nextStep or nextStep == 'nan':
                         continue
-                    message = 'next value {} is not an integer'.format(nextStep)
-                    logging.error(message)
-                    sys.exit(message)
+                    Configuration().error('next value {} is not an integer'.format(nextStep))
                 self.steps[stepId].addNext(self.steps[nextStep])
 
     def _findFirsts(self):
