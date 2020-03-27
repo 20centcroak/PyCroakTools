@@ -15,17 +15,19 @@ class Presentation:
     Finally this presentation is versioned, it relies on the different slide versions.
     """
 
-    def createPresentation(self, presName, slides: Slides, slideIds=None, outputFolder=None, links=None, version=0.0):
+    def createPresentation(self, presName, slides: Slides, slideIds=None, outputFolder=None, links=None, version=0.0, imageFolder= None):
         """
         save a revealjs presentation in output folder.
         ---
         Parameters:
         - presName: the filename of the presentation.
+        - slides: the slides to display in presentation
         - slideIds: ordered list of Slide id (See class Slide for more information). 
         Slide content will be retrieve and saved in the presentation from Slides object in this order
         - outputFolder: folder where the presentation will be saved. If None, the current working directory (folder from where the app is launched) is used
         - links: dictionary with key = current slideId and values = next slideIds to be linked to current slideId
         - version: version of the presentation (float) = version of the slides if available or previous version if not. Default value is 0.0
+        - imageFolder: folder that contains images to add in the presentation
         """
         logging.info('create presentation {} '.format(os.path.join(outputFolder, presName)))
         if not outputFolder:
@@ -62,17 +64,19 @@ class Presentation:
 
     def _copyImages(self, slides: Slides, outputFolder: str):
         logging.info('copying images...')
-        slides = slides.slides
-        for id in slides:
-            for version in slides[id]:
-                for part in slides[id][version]:
-                    self._copyImage(slides[id][version][part], outputFolder)
+        output = os.path.join(outputFolder, 'images')
+        imageFolders = slides.imageFolders
+        for slideId in slides.slides:
+            for version in slides.slides[slideId]:
+                for part in slides.slides[slideId][version]:
+                    self._copyImage(slides.slides[slideId][version][part], output)
+        for folder in imageFolders:
+            copy_tree(folder, output)
 
-    def _copyImage(self, slide, outputFolder):
+    def _copyImage(self, slide, output):
         if not slide.isImage:
             return
 
-        output = os.path.join(outputFolder, 'images')
         if output == os.path.dirname(slide.filename):
             return
 

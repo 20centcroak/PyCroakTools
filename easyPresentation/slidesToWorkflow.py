@@ -15,21 +15,14 @@ class SlidesToWorkflow:
         ---Parameters:
         - slides: Slides object used to create a pandas workflow definition
         """
-        slideIds = []
-        slideTitles = []
-        for slideId in slides.slides:
-            slideIds.append(slideId)
-            slideTitle = next(iter(slides.getSlide(
-                slideId, slides.getHighestVersion())))
-            slideTitles.append(slideTitle)
+        slideIds = slides.getDefaultSlideOrder()
+        
+        titles = ["" for slideId in slides.slides]
 
-        sortedIds = sorted(slideIds)
-        nexts = [sortedIds[index+1]
-                 for index, id in enumerate(sortedIds) if index < len(sortedIds)-1]
-        if len(nexts) < len(slideIds):
-            nexts.append('')
+        nexts = [slideIds[index+1]
+                 for index, id in enumerate(slideIds) if index < len(slideIds)-1]
+        nexts.append('')
 
         df = pd.DataFrame(
-            {'stepId': slideIds, 'title': slideTitles, 'nexts': nexts})
-        df.sort_values(by=['stepId'])
+            {'stepId': slideIds, 'title': titles, 'nexts': nexts})
         return df

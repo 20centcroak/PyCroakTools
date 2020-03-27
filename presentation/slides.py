@@ -34,6 +34,7 @@ class Slides:
         """references in a sorted list the different available versions. Some version may be only available for one or more slides."""
         self.displayTitles = displayTitles
         """if True, the slide title is displayedin slides"""
+        self.imageFolders = []
 
     def catalog(self, folder:str, images=False):
         """
@@ -44,6 +45,10 @@ class Slides:
         - images: indicates if files are image files if True
         """
         logging.info('search for files to create slides...')
+
+        if images:
+            self.declareResources(folder)
+
         path = Path(folder).rglob('*.*')
         files = [x for x in path if x.is_file()]
         counter = 0
@@ -64,6 +69,9 @@ class Slides:
             logging.info('{} slides created'.format(counter))
         else:
             logging.warning('no file found to define slides in {}'.format(folder))
+
+    def declareResources(self, imageFolder):
+        self.imageFolders.append(imageFolder)
 
     def addSlide(self, slide: Slide):
         """add a predefined Slide object"""
@@ -89,7 +97,7 @@ class Slides:
             logging.info('slide {} {} created'.format(slideId, title))
 
     def getDefaultSlideOrder(self):
-        return list(self.slides.keys())
+        return sorted(list(self.slides.keys()))
 
     def getFileName(self, title, id, version=0, part=0):
         """returns the slide filename"""
@@ -140,6 +148,10 @@ class Slides:
 
         return self.slides[version][slideId][part]
 
+    def getSlideTitle(self, slideId, version=0):
+        """return the slide title by getting the slide title of its first part"""
+        return self.getSlide(slideId, version)[next(iter(self.getSlide(slideId, version)))].title
+
     def getSlideContents(self, slideId, version=0):
         """returns slide contents, ie a list of markdown contents. Each item of the sorted list correspond to a slide part.If no version is provided, version 0.0 is returned."""
         contents = []
@@ -164,10 +176,7 @@ class Slides:
             return None
         mdLinks = ["  \n"]
         for slideId in links:
-            slide = self.getSlide(slideId, version)
-            if not slide:
-                continue
             href = '#/'+str(links[slideId])
-            text = next(iter(slide.values())).title
+            text = self.getSlideTitle(slideId, version)
             mdLinks.append('['+text+']('+href+')')
         return mdLinks

@@ -46,13 +46,14 @@ class Workflow:
     def _build(self, workflow):
         for index, stepId in enumerate(workflow['stepId']):
             try:
-                id = int(stepId)
+                stepId = int(stepId)
             except ValueError:
                 Configuration().error('step id {} is not an integer'.format(stepId))
-            step = Step(id)
+            step = Step(stepId)
             self.steps[stepId] = step
 
         for index, stepId in enumerate(workflow['stepId']):
+            stepId = int(stepId)
             nexts = str(workflow['nexts'][index]).split('-')
             for nextStep in nexts:
                 try:

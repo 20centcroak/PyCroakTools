@@ -36,31 +36,21 @@ class SlideGenerator:
         filename = Path(file).name
         patterns = re.search(r'([0-9]+)_([^_]+)_?([^_]*)_?(.*)\.',
                              filename, re.IGNORECASE)
-        if len(patterns.groups()) < 2:
+        if not patterns or len(patterns.groups()) < 2:
             logging.warning(
                 'filename {} does not comply with expected pattern: id_title[_part][_version]'.format(filename))
             return None
 
         details = dict()
-        # if patterns.group(1):
         details['id'] = patterns.group(1)
 
-        # if patterns.group(2):
         details['title'] = patterns.group(2)
 
-        # try:
         details['part'] = patterns.group(3) if len(
             patterns.group(3)) > 0 and patterns.group(3) else 0.0
-        # except ValueError:
-        #     logging.warning(
-        #         'part number expected, {} found'.format(patterns.group(3)))
 
-        # try:
         details['version'] = float(patterns.group(4)) if len(
             patterns.group(4)) > 0 and patterns.group(4) else 0.0
-        # except ValueError:
-        #     logging.warning(
-        #         'version number expected, {} found'.format(patterns.group(4)))
 
         return details
 
@@ -94,6 +84,7 @@ class SlideGenerator:
     def _getSlide(self, details, file, isImage=False):
         if not self._formatAndCheck(details):
             return None
+
         slide = Slide(details['id'], details['title'],
                       details['part'], details['version'], isImage=isImage)
         slide.associateFile(file)
@@ -109,6 +100,10 @@ class SlideGenerator:
         The check is ok if this dictionary contains at least the keys 'title' and 'id'
         and if the value associated with the id key is an integer value
         """
+
+        if not details:
+            return False
+
         keys = ['title', 'id']
         for key in keys:
             if key not in details:

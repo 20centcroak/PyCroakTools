@@ -83,11 +83,11 @@ class Slide:
                 content = self._getFileContent()
 
         if addTitle or not content:
-            self._addTitle(content)
-        
+            content = self._addTitle(content)
+
         return content
 
     def _addTitle(self, content):
         if not content:
             content = ''
-        return '# '+self.title+'\n'+content
+        return '## '+self.title+'\n'+content

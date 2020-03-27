@@ -99,6 +99,9 @@ class Generator(Settings):
             except FileNotFoundError:
                 Configuration().error('file {} not found'.format(self.workflowFile))
 
+        if not slides.getDefaultSlideOrder():
+            Configuration().error('no workflow or slide found')
+
         return Workflow(SlidesToWorkflow().create(slides), 'presentation')
 
     def _manageMissingSlides(self, slides: Slides, workflow: Workflow):
@@ -116,4 +119,4 @@ class Generator(Settings):
                 presentation = toPres.createLinearPresentations(version)
             if self.createWorkflowPresentation:
                 presentation = toPres.createWorkflowPresentation(version)
-            return presentation
+        return presentation

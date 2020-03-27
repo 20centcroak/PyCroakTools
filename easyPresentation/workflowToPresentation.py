@@ -76,8 +76,7 @@ class WorkflowToPresentation:
         found the previous one is used.
         """
         presName = self.workflow.name + '_v' + str(version)+'.html'
-        slideIds = [step.id for step in self.workflow.getSteps()]
         links = self.workflow.getLinksPerSteps()
 
-        return Presentation().createPresentation(presName, self.slides, slideIds, self.outputFolder,
-                                          links, version)
+        return Presentation().createPresentation(presName, self.slides, outputFolder=self.outputFolder,
+                                          links=links, version=version)
