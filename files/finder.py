@@ -11,7 +11,7 @@ from ftplib import FTP
 from pathlib import Path
 from datetime import datetime
 from zipfile import ZipFile
-from pycroaktools.applauncher.settings import Settings
+from pycroaktools.applauncher import Settings
 import logging
 import os
 import re

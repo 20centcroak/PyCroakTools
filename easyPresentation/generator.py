@@ -9,7 +9,7 @@ import pycroaktools.workflow as wk
 import pycroaktools.easyPresentation as ep
 
 
-class Generator(launcher.settings.Settings):
+class Generator(launcher.Settings):
     """
     The Generator class generates presentations either based on a workflow, on a list of images, a list of markdown slides or all together.
     It inherits from pycroaktools.applauncher.settings.Settings that manages the settings.
@@ -93,11 +93,11 @@ class Generator(launcher.settings.Settings):
                 return wk.workflow.Workflow(pd.read_csv(
                     self.workflowFile), os.path.basename(self.workflowFile)[:-4])
             except FileNotFoundError:
-                launcher.configuration.Configuration().error(
+                launcher.Configuration().error(
                     'file {} not found'.format(self.workflowFile))
 
         if not slides.getDefaultSlideOrder():
-            launcher.configuration.Configuration().error('no workflow or slide found')
+            launcher.Configuration().error('no workflow or slide found')
 
         return wk.workflow.Workflow(ep.slidesToWorkflow.SlidesToWorkflow().create(slides), 'presentation')
 
