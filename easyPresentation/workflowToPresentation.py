@@ -1,11 +1,5 @@
-from pycroaktools.presentation.presentation import Presentation
-from pycroaktools.presentation.slides import Slides
-from pycroaktools.presentation.slide import Slide
-from pycroaktools.workflow.workflow import Workflow
-from pycroaktools.presentation.images import Images
-import os
-import re
-import logging
+import pycroaktools.presentation as pres
+import pycroaktools.workflow.workflow as wk
 
 
 class WorkflowToPresentation:
@@ -24,7 +18,7 @@ class WorkflowToPresentation:
 
     """
 
-    def __init__(self, workflow: Workflow, slides: Slides, outputFolder):
+    def __init__(self, workflow: wk.Workflow, slides: pres.slides.Slides, outputFolder):
         """
         Builds the object
         ---
@@ -43,7 +37,7 @@ class WorkflowToPresentation:
         for path in paths:
             presName = self.workflow.name+'_v'+str(version)+'_'
             for step in path:
-                presName += str(step.id)+'-'
+                presName += str(step.stepId)+'-'
             presNames.append(presName[:-1]+'.html')
         return presNames
 
@@ -60,8 +54,8 @@ class WorkflowToPresentation:
         presNames = self._getPresNames(paths, version)
 
         for index, path in enumerate(paths):
-            slideIds = [step.id for step in path]
-            presentation = Presentation().createPresentation(
+            slideIds = [step.stepId for step in path]
+            presentation = pres.presentation.Presentation().createPresentation(
                 presNames[index], self.slides, slideIds, self.outputFolder, version=version)
 
         return presentation
@@ -78,5 +72,5 @@ class WorkflowToPresentation:
         presName = self.workflow.name + '_v' + str(version)+'.html'
         links = self.workflow.getLinksPerSteps()
 
-        return Presentation().createPresentation(presName, self.slides, outputFolder=self.outputFolder,
-                                          links=links, version=version)
+        return pres.presentation.Presentation().createPresentation(presName, self.slides, outputFolder=self.outputFolder,
+                                                                   links=links, version=version)

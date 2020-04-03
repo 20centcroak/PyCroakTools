@@ -1,19 +1,15 @@
 import logging
 import os
-import sys
 import webbrowser
 import pandas as pd
-from distutils.dir_util import copy_tree
-from pycroaktools.applauncher.settings import Settings
-from pycroaktools.presentation.images import Images
-from pycroaktools.presentation.slides import Slides
-from pycroaktools.workflow.workflow import Workflow
-from pycroaktools.workflow.flowchart import Flowchart
-from pycroaktools.easyPresentation.slidesToWorkflow import SlidesToWorkflow
-from pycroaktools.easyPresentation.workflowToPresentation import WorkflowToPresentation
-from pycroaktools.applauncher.configuration import Configuration
+import distutils.dir_util as dirutil
+import pycroaktools.applauncher as launcher
+import pycroaktools.presentation.slides as pslides
+import pycroaktools.workflow as wk
+import pycroaktools.easyPresentation as ep
 
-class Generator(Settings):
+
+class Generator(launcher.settings.Settings):
     """
     The Generator class generates presentations either based on a workflow, on a list of images, a list of markdown slides or all together.
     It inherits from pycroaktools.applauncher.settings.Settings that manages the settings.
@@ -30,8 +26,8 @@ class Generator(Settings):
         These files define either a slide thanks to their name or thanks to their header.
         See class Slides to get more details about the header.
 
-        - imageFolder: folder that contains images. These images define either their own slide.
-        If the image name complies with the slide definition (see class Slides) or may be called by a markdown file.
+        - imageFolder: folder that contains images. These images define either their own slide if the image name complies 
+        with the slide definition (see class Slides) or may be called by a markdown file.
 
         - outputFolder: folder where the presentation is created. If none is provided, the current working directory
         (from where the app is launched) is used.
@@ -43,21 +39,21 @@ class Generator(Settings):
         - createLinearPresentations: if True, each possible path defined by the workflow generates an individual presentation. 
         Then Each slide has only one next slide. This is a linear sequence from first to last slide.
 
-        - createWorkflowPresentation: if True, a unique presentation is generated to represent the workflow. Each slide may have multiple next slides. 
-        Then links give choices to follow a path or another in the workflow
+        - createWorkflowPresentation: if True, a unique presentation is generated to represent the workflow. 
+        Each slide may have multiple next slides. Then links give choices to follow a path or another in the workflow
 
         - displayTitles: if true, each slide displays its title
         """
 
-        self.slideFolder = None
-        self.imageFolder = None
+        self.slideFolder = 'slides'
+        self.imageFolder = 'images'
         self.outputFolder = os.getcwd()
         self.workflowFile = None
         self.versions = [0.]
         self.createFlowchart = False
         self.createLinearPresentations = False
         self.createWorkflowPresentation = True
-        self.displayTitles = False   
+        self.displayTitles = False
         self.setProperties(settings)
 
         self._build()
@@ -75,15 +71,15 @@ class Generator(Settings):
             return
         new = 2
         url = "file:///"+filename
-        webbrowser.open(url,new=new)
+        webbrowser.open(url, new=new)
 
-    def _manageImages(self, slides: Slides):
+    def _manageImages(self, slides: pslides.Slides):
         if not self.imageFolder:
             return
         slides.catalog(self.imageFolder, images=True)
 
     def _manageSlides(self):
-        slides = Slides(self.displayTitles)
+        slides = pslides.Slides(self.displayTitles)
         if self.slideFolder:
             slides.catalog(self.slideFolder)
         else:
@@ -91,30 +87,33 @@ class Generator(Settings):
 
         return slides
 
-    def _manageWorkflow(self, slides: Slides):
+    def _manageWorkflow(self, slides: pslides.Slides):
         if self.workflowFile:
             try:
-                return Workflow(pd.read_csv(
+                return wk.workflow.Workflow(pd.read_csv(
                     self.workflowFile), os.path.basename(self.workflowFile)[:-4])
             except FileNotFoundError:
-                Configuration().error('file {} not found'.format(self.workflowFile))
+                launcher.configuration.Configuration().error(
+                    'file {} not found'.format(self.workflowFile))
 
         if not slides.getDefaultSlideOrder():
-            Configuration().error('no workflow or slide found')
+            launcher.configuration.Configuration().error('no workflow or slide found')
 
-        return Workflow(SlidesToWorkflow().create(slides), 'presentation')
+        return wk.workflow.Workflow(ep.slidesToWorkflow.SlidesToWorkflow().create(slides), 'presentation')
 
-    def _manageMissingSlides(self, slides: Slides, workflow: Workflow):
-        slides.createMissingSlides([step.id for step in workflow.getSteps()])
+    def _manageMissingSlides(self, slides: pslides.Slides, workflow: wk.workflow.Workflow):
+        slides.createMissingSlides(
+            [step.stepId for step in workflow.getSteps()])
 
-    def _generate(self, workflow: Workflow, slides: Slides):
-        toPres = WorkflowToPresentation(
+    def _generate(self, workflow: wk.workflow.Workflow, slides: pslides.Slides):
+        toPres = ep.workflowToPresentation.WorkflowToPresentation(
             workflow, slides, self.outputFolder)
 
+        presentation = None
         for version in self.versions:
             logging.info('version {} ...'.format(version))
             if self.createFlowchart:
-                Flowchart(workflow).display()
+                wk.flowchart.Flowchart(workflow).display()
             if self.createLinearPresentations:
                 presentation = toPres.createLinearPresentations(version)
             if self.createWorkflowPresentation:

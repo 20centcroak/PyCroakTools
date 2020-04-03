@@ -6,19 +6,20 @@ class Step:
     or last (ie wihtout next step)
     """
 
-    def __init__(self, id: int):
+    def __init__(self, stepId: int, title=None):
         """
         Builds the object.
         ---
         Parameters:
-        - id: unique id for a step in a workflow
+        - stepId: unique id for a step in a workflow
         """
-        self.id = id
+        self.stepId = stepId
         """ id of the step"""
         self.nexts = dict()
         """dictionary with keys = id of next steps and values = next steps as Step object"""
         self.previouses = dict()
         """dictionary with keys = id of previous steps and values = previous steps as Step object"""
+        self.title = title if title else 'step '+str(stepId)
 
     def getNexts(self):
         """
@@ -39,10 +40,10 @@ class Step:
         Parameters:
         - nextStep: next step as Step object
         """
-        if nextStep.id not in self.nexts:
-            self.nexts[nextStep.id] = nextStep
-        if self.id not in nextStep.previouses:
-            nextStep.previouses[self.id] = self
+        if nextStep.stepId not in self.nexts:
+            self.nexts[nextStep.stepId] = nextStep
+        if self.stepId not in nextStep.previouses:
+            nextStep.previouses[self.stepId] = self
 
     def isFirst(self):
         """

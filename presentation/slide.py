@@ -1,10 +1,6 @@
 import re
-from pathlib import Path
-import logging
-import re
-import sys
-import os
-from pycroaktools.applauncher.configuration import Configuration
+import os.path as path
+import pycroaktools.applauncher.configuration as config
 
 
 class Slide:
@@ -53,7 +49,7 @@ class Slide:
             with open(self.filename) as file:
                 data = file.read()
         except FileNotFoundError:
-            Configuration().error('file {} not found'.format(self.filename))
+            config.Configuration().error('file {} not found'.format(self.filename))
 
         groups = re.split('---+', data)
 
@@ -67,8 +63,8 @@ class Slide:
 
     def _getImageContent(self):
         # def createImageSlideContent(self, slides, outputFolder, image):
-        imageLink = os.path.basename(os.path.dirname(
-            self.filename))+'/'+os.path.basename(self.filename)
+        imageLink = path.basename(path.dirname(
+            self.filename))+'/'+path.basename(self.filename)
         content = '![{0}]({1})'.format(
             self.title, re.sub(r'\s+', '%20', imageLink))
         return content

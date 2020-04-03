@@ -1,4 +1,4 @@
-from pycroaktools.presentation.slides import Slides
+import pycroaktools.presentation.slides as pslides
 import pandas as pd
 
 
@@ -9,20 +9,19 @@ class SlidesToWorkflow:
     Each step has 1 next (1->2), (2->5), (5->9). The slide title defines the step title.
     """
 
-    def create(self, slides:Slides):
+    def create(self, slides: pslides.Slides):
         """
         create a pandas workflow definition from a Slides object
         ---Parameters:
         - slides: Slides object used to create a pandas workflow definition
         """
         slideIds = slides.getDefaultSlideOrder()
-        
+
         titles = ["" for slideId in slides.slides]
 
         nexts = [slideIds[index+1]
                  for index, id in enumerate(slideIds) if index < len(slideIds)-1]
         nexts.append('')
 
-        df = pd.DataFrame(
+        return pd.DataFrame(
             {'stepId': slideIds, 'title': titles, 'nexts': nexts})
-        return df

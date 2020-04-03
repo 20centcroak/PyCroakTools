@@ -83,6 +83,9 @@ slides.addSlide(slide2part1)
 slides.addSlide(slide3version0_1)
 slides.addSlide(slide3version1)
 
+#if slides embed images from imageFolder in their markdown content, the following line is required:
+# slides.declareResources(imageFolder):
+
 #Define order of slides according to slide ids
 displayOrder = [1, 2, 3]
 

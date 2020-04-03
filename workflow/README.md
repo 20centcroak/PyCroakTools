@@ -39,5 +39,5 @@ workflow = Workflow(pd.read_csv('workflow.csv'), 'myWorkflow') #read_csv may be 
 paths = workflow.getAllPaths()
 for path in paths:
     for step in path:
-        print(step.id)
+        print(step.stepId)
 ```

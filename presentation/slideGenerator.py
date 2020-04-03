@@ -1,7 +1,7 @@
-import re
 import logging
-from pathlib import Path
-from pycroaktools.presentation.slide import Slide
+import os.path as path
+import re
+import pycroaktools.presentation.slide as pslide
 
 
 class SlideGenerator:
@@ -33,7 +33,7 @@ class SlideGenerator:
         return self._getSlide(details, file)
 
     def _fromFilename(self, file):
-        filename = Path(file).name
+        filename = path.basename(file)
         patterns = re.search(r'([0-9]+)_([^_]+)_?([^_]*)_?(.*)\.',
                              filename, re.IGNORECASE)
         if not patterns or len(patterns.groups()) < 2:
@@ -72,12 +72,13 @@ class SlideGenerator:
 
         details = dict()
         header = contents[1]
-        headerLines = re.split('\r?\n', header)
+        headerLines = header.splitlines()
         for line in headerLines:
-            splitLine = re.split(':', line)
-            headerTag = splitLine[0]
-            if len(splitLine) > 1 and splitLine[1]:
-                details[headerTag] = splitLine[1]
+            splitLine = line.split(':', 1)
+            if len(splitLine) < 2:
+                continue
+            headerTag = splitLine[0].strip()
+            details[headerTag] = splitLine[1].strip()
 
         return self._getSlide(details, file)
 
@@ -85,7 +86,7 @@ class SlideGenerator:
         if not self._formatAndCheck(details):
             return None
 
-        slide = Slide(details['id'], details['title'],
+        slide = pslide.Slide(details['id'], details['title'],
                       details['part'], details['version'], isImage=isImage)
         slide.associateFile(file)
         return slide

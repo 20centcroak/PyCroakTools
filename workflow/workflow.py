@@ -1,8 +1,8 @@
 import logging
-from pandas import DataFrame
-import sys
-from pycroaktools.workflow.step import Step
-from pycroaktools.applauncher.configuration import Configuration
+import pandas as pd
+import pycroaktools.workflow.step as wkstep
+import pycroaktools.applauncher.configuration as config
+
 
 class Workflow:
     """
@@ -22,9 +22,9 @@ class Workflow:
     Step 1 points to 2 next steps: steps 2 and 3, step 2 points to step 4, ...
     Steps have to be defined with a unique identifier. This identifier must be an integer. 
     But, as we can see, there is no need to define a continuous suite and the identifiers don't need to be sorted. 
-    """ 
+    """
 
-    def __init__(self, workflow:DataFrame, name='workflow'):
+    def __init__(self, workflow: pd.DataFrame, name='workflow'):
         """
         builds the class according to the pandas definition of the workflow and optionally its name.
         Parameters
@@ -43,26 +43,48 @@ class Workflow:
         self._findFirsts()
         self._order = self._getStepOrder()
 
-    def _build(self, workflow):
-        for index, stepId in enumerate(workflow['stepId']):
+    def _build(self, workflow: pd.DataFrame):
+
+        self._checkData(workflow)
+
+        for index, stepId in enumerate(workflow.stepId):
             try:
                 stepId = int(stepId)
             except ValueError:
-                Configuration().error('step id {} is not an integer'.format(stepId))
-            step = Step(stepId)
+                config.Configuration().error(
+                    'Workflow definition error - step id {} is not an integer'.format(stepId))
+            step = wkstep.Step(stepId, workflow.title[index])
             self.steps[stepId] = step
 
-        for index, stepId in enumerate(workflow['stepId']):
+        for index, stepId in enumerate(workflow.stepId):
             stepId = int(stepId)
-            nexts = str(workflow['nexts'][index]).split('-')
+            nexts = str(workflow.nexts[index]).split('-')
             for nextStep in nexts:
                 try:
                     nextStep = int(float(nextStep))
                 except ValueError:
                     if not nextStep or nextStep == 'nan':
                         continue
-                    Configuration().error('next value {} is not an integer'.format(nextStep))
-                self.steps[stepId].addNext(self.steps[nextStep])
+                    config.Configuration().error(
+                        'Workflow definition error - next value {} is not an integer'.format(nextStep))
+                try:
+                    self.steps[stepId].addNext(self.steps[nextStep])
+                except KeyError:
+                    config.Configuration().error(
+                        'Workflow definition error - step {0} points to step {1} but no definition for step {1}'.format(stepId, nextStep))
+
+    def _checkData(self, workflow: pd.DataFrame):
+        if 'stepId' not in workflow:
+            config.Configuration().error('Workflow definition error - no column named stepId')
+        if 'nexts' not in workflow:
+            config.Configuration().error('Workflow definition error - no column named nexts')
+        if 'title' in workflow:
+            return
+
+        titles = []
+        for stepId in workflow.stepId:
+            titles.append('step '+str(stepId))
+        workflow['title'] = titles
 
     def _findFirsts(self):
         for step in self.getSteps():
@@ -131,13 +153,13 @@ class Workflow:
         for step in self.getSteps():
             nextString = ''
             for nextStep in step.getNexts():
-                nextString += nextStep.id+', '
+                nextString += nextStep.stepId+', '
             nextString = nextString[:-2]
             previousString = ''
             for previousStep in step.getPreviouses():
-                previousString += previousStep.id+', '
+                previousString += previousStep.stepId+', '
             previousString = previousString[:-2]
-            logging.info('step {} has {} next ({}) and {} previous ({})'.format(step.id, len(
+            logging.info('step {} has {} next ({}) and {} previous ({})'.format(step.stepId, len(
                 step.getNexts()), nextString, len(step.getPreviouses()), previousString))
 
     def getSteps(self):
@@ -148,9 +170,9 @@ class Workflow:
         stepNumberPerId = dict()
         stepNumber = 0
         for step in self.getSteps():
-            if step.id in stepNumberPerId:
+            if step.stepId in stepNumberPerId:
                 continue
-            stepNumberPerId[step.id] = stepNumber
+            stepNumberPerId[step.stepId] = stepNumber
             stepNumber += 1
         return stepNumberPerId
 
@@ -158,12 +180,12 @@ class Workflow:
         """returns a dictionary with keys= stepID and value = the value return by Workflow.getLinks(step) where step correspond to stepID"""
         links = dict()
         for step in self.getSteps():
-            links[step.id] = self.getLinks(step)
+            links[step.stepId] = self.getLinks(step)
         return links
 
-    def getLinks(self, step:Step):
+    def getLinks(self, step: wkstep.Step):
         """returns a dictionary with keys = next step id and values = index of the next step in the list returned by Workflow.getSteps()"""
-        nextIds = [step.id for step in step.getNexts()]
+        nextIds = [step.stepId for step in step.getNexts()]
         links = dict()
         for nextId in nextIds:
             links[nextId] = self._order[nextId]

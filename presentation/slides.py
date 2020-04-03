@@ -1,11 +1,9 @@
-from pathlib import Path
-from pycroaktools.presentation.slide import Slide
-from pycroaktools.presentation.slideGenerator import SlideGenerator
-from pycroaktools.presentation.images import Images
+import pathlib
 import logging
-import bisect
-import os
-import re
+import bisect as bs
+import pycroaktools.presentation.slide as pslide
+import pycroaktools.presentation.slideGenerator as psgenerator
+import pycroaktools.applauncher.configuration as config
 
 
 class Slides:
@@ -14,7 +12,7 @@ class Slides:
 
     The slides may be retrieved from a disk location if the markdown files defining the slide content respect one of the following rules:
     - the markdown file owns a header section composed of a "---" sequence defining the start and end of the header. It should be at the very beginning of the file.
-    In this header at least 2 keys are defined :
+    In this header at least 2 keys must be defined :
         - title: arbitrary title
         - id: a unique integer. 2 slides can't have the same id, except if it is split.
         - part: [optional] float number. A Slide may be split in multiple parts. In this case, they have the same id but a different part number. If not set, 0.0 is the default value.
@@ -36,7 +34,7 @@ class Slides:
         """if True, the slide title is displayedin slides"""
         self.imageFolders = []
 
-    def catalog(self, folder:str, images=False):
+    def catalog(self, folder: str, images=False):
         """
         references slides by the files contained in the given folder if they comply with the rules defined in the class definition
         ---
@@ -49,37 +47,39 @@ class Slides:
         if images:
             self.declareResources(folder)
 
-        path = Path(folder).rglob('*.*')
+        path = pathlib.Path(folder).rglob('*.*')
         files = [x for x in path if x.is_file()]
         counter = 0
         for file in files:
             slide = None
             if images:
-                slide = SlideGenerator().fromImage(file)
+                slide = psgenerator.SlideGenerator().fromImage(file)
             else:
-                slide = SlideGenerator().fromHeader(file)
+                slide = psgenerator.SlideGenerator().fromHeader(file)
                 if not slide:
-                    slide = SlideGenerator().fromFilename(file)
+                    slide = psgenerator.SlideGenerator().fromFilename(file)
             if not slide:
-                logging.warning('can\'t retrieve useful information from file {}, slide is not created.'.format(Path(file).name))
+                logging.warning(
+                    'can\'t retrieve useful information from file {}, slide is not created.'.format(file))
                 continue
             self.addSlide(slide)
-            counter+=1
-        if counter >0:
+            counter += 1
+        if counter > 0:
             logging.info('{} slides created'.format(counter))
         else:
-            logging.warning('no file found to define slides in {}'.format(folder))
+            logging.warning(
+                'no file found to define slides in {}'.format(folder))
 
     def declareResources(self, imageFolder):
         self.imageFolders.append(imageFolder)
 
-    def addSlide(self, slide: Slide):
+    def addSlide(self, slide: pslide.Slide):
         """add a predefined Slide object"""
         version = slide.version
         if slide.id not in self.slides:
             self.slides[slide.id] = dict()
         if version not in self.slides[slide.id]:
-            bisect.insort(self.versions, version)
+            bs.insort(self.versions, version)
             self.slides[slide.id][version] = dict()
         self.slides[slide.id][version][slide.part] = slide
 
@@ -91,7 +91,7 @@ class Slides:
             if self.getSlide(slideId, self.getHighestVersion()):
                 continue
             title = 'slide {}'.format(slideId)
-            slide = Slide(slideId, title)
+            slide = pslide.Slide(slideId, title)
             slide.setContent('# '+title)
             self.addSlide(slide)
             logging.info('slide {} {} created'.format(slideId, title))
@@ -143,8 +143,7 @@ class Slides:
         try:
             return slide[part]
         except KeyError:
-            logging.error(
-                "part {} not found for slide {}".format(part, slideId))
+            config.Configuration().error("part {} not found for slide {}".format(part, slideId))
 
         return self.slides[version][slideId][part]
 

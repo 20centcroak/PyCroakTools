@@ -1,9 +1,9 @@
-from pycroaktools.workflow.workflow import Workflow
-from pycroaktools.presentation.slides import Slides
-from distutils.dir_util import copy_tree
-from distutils.file_util import copy_file
 import os
 import logging
+import pycroaktools.workflow.workflow as wk
+import pycroaktools.presentation.slides as pslides
+import distutils.dir_util as dirutil
+import distutils.file_util as fileutil
 
 
 class Presentation:
@@ -15,7 +15,7 @@ class Presentation:
     Finally this presentation is versioned, it relies on the different slide versions.
     """
 
-    def createPresentation(self, presName, slides: Slides, slideIds=None, outputFolder=None, links=None, version=0.0, imageFolder= None):
+    def createPresentation(self, presName, slides: pslides.Slides, slideIds=None, outputFolder=None, links=None, version=0.0, imageFolder=None):
         """
         save a revealjs presentation in output folder.
         ---
@@ -29,7 +29,8 @@ class Presentation:
         - version: version of the presentation (float) = version of the slides if available or previous version if not. Default value is 0.0
         - imageFolder: folder that contains images to add in the presentation
         """
-        logging.info('create presentation {} '.format(os.path.join(outputFolder, presName)))
+        logging.info('create presentation {} '.format(
+            os.path.join(outputFolder, presName)))
         if not outputFolder:
             outputFolder = os.getcwd()
         self._copyLibs(outputFolder)
@@ -60,18 +61,19 @@ class Presentation:
         logging.info('copying libs...')
         libs = os.path.join(os.path.dirname(
             __file__), 'assets', 'reveal.js-3.9.2')
-        copy_tree(libs, os.path.join(outputFolder, 'libs'))
+        dirutil.copy_tree(libs, os.path.join(outputFolder, 'libs'))
 
-    def _copyImages(self, slides: Slides, outputFolder: str):
+    def _copyImages(self, slides: pslides.Slides, outputFolder: str):
         logging.info('copying images...')
         output = os.path.join(outputFolder, 'images')
         imageFolders = slides.imageFolders
         for slideId in slides.slides:
             for version in slides.slides[slideId]:
                 for part in slides.slides[slideId][version]:
-                    self._copyImage(slides.slides[slideId][version][part], output)
+                    self._copyImage(
+                        slides.slides[slideId][version][part], output)
         for folder in imageFolders:
-            copy_tree(folder, output)
+            dirutil.copy_tree(folder, output, update=True)
 
     def _copyImage(self, slide, output):
         if not slide.isImage:
@@ -84,7 +86,7 @@ class Presentation:
             os.makedirs(output)
 
         newFile = os.path.join(output, os.path.basename(slide.filename))
-        copy_file(slide.filename, newFile)
+        fileutil.copy_file(slide.filename, newFile, update=True)
         slide.filename = newFile
 
     def _copyInOutput(self, output, content):

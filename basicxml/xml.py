@@ -1,11 +1,11 @@
-import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import parse, fromstring
 
 class Xml:
     def __init__(self, file=None, text=None):
         if file:
-            tree = ET.parse(file)
+            tree = parse(file)
         elif text:
-            tree = ET.fromstring(text)
+            tree = fromstring(text)
         else:
             return
         self.root = tree.getroot()
