@@ -1,9 +1,9 @@
 import pathlib
 import logging
 import bisect as bs
-import pycroaktools.presentation.slide as pslide
-import pycroaktools.presentation.slideGenerator as psgenerator
-import pycroaktools.applauncher.configuration as config
+from pycroaktools.presentation import Slide
+from pycroaktools.presentation import SlideGenerator
+from pycroaktools.applauncher import Configuration
 
 
 class Slides:
@@ -53,11 +53,11 @@ class Slides:
         for file in files:
             slide = None
             if images:
-                slide = psgenerator.SlideGenerator().fromImage(file)
+                slide = SlideGenerator().fromImage(file)
             else:
-                slide = psgenerator.SlideGenerator().fromHeader(file)
+                slide = SlideGenerator().fromHeader(file)
                 if not slide:
-                    slide = psgenerator.SlideGenerator().fromFilename(file)
+                    slide = SlideGenerator().fromFilename(file)
             if not slide:
                 logging.warning(
                     'can\'t retrieve useful information from file {}, slide is not created.'.format(file))
@@ -73,7 +73,7 @@ class Slides:
     def declareResources(self, imageFolder):
         self.imageFolders.append(imageFolder)
 
-    def addSlide(self, slide: pslide.Slide):
+    def addSlide(self, slide: Slide):
         """add a predefined Slide object"""
         version = slide.version
         if slide.id not in self.slides:
@@ -91,7 +91,7 @@ class Slides:
             if self.getSlide(slideId, self.getHighestVersion()):
                 continue
             title = 'slide {}'.format(slideId)
-            slide = pslide.Slide(slideId, title)
+            slide = Slide(slideId, title)
             slide.setContent('# '+title)
             self.addSlide(slide)
             logging.info('slide {} {} created'.format(slideId, title))
@@ -143,7 +143,7 @@ class Slides:
         try:
             return slide[part]
         except KeyError:
-            config.Configuration().error("part {} not found for slide {}".format(part, slideId))
+            Configuration().error("part {} not found for slide {}".format(part, slideId))
 
         return self.slides[version][slideId][part]
 

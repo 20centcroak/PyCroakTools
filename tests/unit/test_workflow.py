@@ -2,8 +2,8 @@ import unittest
 import os
 import pandas as pd
 
-from pycroaktools.workflow.workflow import Workflow
-from pycroaktools.workflow.step import Step
+from pycroaktools.workflow import Workflow
+from pycroaktools.workflow import Step
 
 
 class TestWorkflow(unittest.TestCase):

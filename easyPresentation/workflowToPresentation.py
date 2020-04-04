@@ -1,4 +1,4 @@
-import pycroaktools.presentation as pres
+from pycroaktools.presentation import Presentation, Slides
 import pycroaktools.workflow.workflow as wk
 
 
@@ -18,7 +18,7 @@ class WorkflowToPresentation:
 
     """
 
-    def __init__(self, workflow: wk.Workflow, slides: pres.slides.Slides, outputFolder):
+    def __init__(self, workflow: wk.Workflow, slides: Slides, outputFolder):
         """
         Builds the object
         ---
@@ -55,7 +55,7 @@ class WorkflowToPresentation:
 
         for index, path in enumerate(paths):
             slideIds = [step.stepId for step in path]
-            presentation = pres.presentation.Presentation().createPresentation(
+            presentation = Presentation().createPresentation(
                 presNames[index], self.slides, slideIds, self.outputFolder, version=version)
 
         return presentation
@@ -72,5 +72,5 @@ class WorkflowToPresentation:
         presName = self.workflow.name + '_v' + str(version)+'.html'
         links = self.workflow.getLinksPerSteps()
 
-        return pres.presentation.Presentation().createPresentation(presName, self.slides, outputFolder=self.outputFolder,
+        return Presentation().createPresentation(presName, self.slides, outputFolder=self.outputFolder,
                                                                    links=links, version=version)

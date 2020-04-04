@@ -1,8 +1,7 @@
 import unittest
 import os
 
-from pycroaktools.files.finder import Finder
-
+from pycroaktools.files import Finder
 
 class TestFinder(unittest.TestCase):
 

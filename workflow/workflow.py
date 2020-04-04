@@ -1,7 +1,7 @@
 import logging
 import pandas as pd
-import pycroaktools.workflow.step as wkstep
-import pycroaktools.applauncher.configuration as config
+from pycroaktools.workflow import Step
+from pycroaktools.applauncher.configuration import Configuration
 
 
 class Workflow:
@@ -51,9 +51,9 @@ class Workflow:
             try:
                 stepId = int(stepId)
             except ValueError:
-                config.Configuration().error(
+                Configuration().error(
                     'Workflow definition error - step id {} is not an integer'.format(stepId))
-            step = wkstep.Step(stepId, workflow.title[index])
+            step = Step(stepId, workflow.title[index])
             self.steps[stepId] = step
 
         for index, stepId in enumerate(workflow.stepId):
@@ -65,19 +65,19 @@ class Workflow:
                 except ValueError:
                     if not nextStep or nextStep == 'nan':
                         continue
-                    config.Configuration().error(
+                    Configuration().error(
                         'Workflow definition error - next value {} is not an integer'.format(nextStep))
                 try:
                     self.steps[stepId].addNext(self.steps[nextStep])
                 except KeyError:
-                    config.Configuration().error(
+                    Configuration().error(
                         'Workflow definition error - step {0} points to step {1} but no definition for step {1}'.format(stepId, nextStep))
 
     def _checkData(self, workflow: pd.DataFrame):
         if 'stepId' not in workflow:
-            config.Configuration().error('Workflow definition error - no column named stepId')
+            Configuration().error('Workflow definition error - no column named stepId')
         if 'nexts' not in workflow:
-            config.Configuration().error('Workflow definition error - no column named nexts')
+            Configuration().error('Workflow definition error - no column named nexts')
         if 'title' in workflow:
             return
 
@@ -183,7 +183,7 @@ class Workflow:
             links[step.stepId] = self.getLinks(step)
         return links
 
-    def getLinks(self, step: wkstep.Step):
+    def getLinks(self, step: Step):
         """returns a dictionary with keys = next step id and values = index of the next step in the list returned by Workflow.getSteps()"""
         nextIds = [step.stepId for step in step.getNexts()]
         links = dict()

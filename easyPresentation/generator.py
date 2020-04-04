@@ -4,8 +4,8 @@ import webbrowser
 import pandas as pd
 import distutils.dir_util as dirutil
 import pycroaktools.applauncher as launcher
-import pycroaktools.presentation.slides as pslides
-import pycroaktools.workflow as wk
+from pycroaktools.presentation import Slides
+from pycroaktools.workflow import Workflow, Flowchart
 import pycroaktools.easyPresentation as ep
 
 
@@ -73,13 +73,13 @@ class Generator(launcher.Settings):
         url = "file:///"+filename
         webbrowser.open(url, new=new)
 
-    def _manageImages(self, slides: pslides.Slides):
+    def _manageImages(self, slides: Slides):
         if not self.imageFolder:
             return
         slides.catalog(self.imageFolder, images=True)
 
     def _manageSlides(self):
-        slides = pslides.Slides(self.displayTitles)
+        slides = Slides(self.displayTitles)
         if self.slideFolder:
             slides.catalog(self.slideFolder)
         else:
@@ -87,10 +87,10 @@ class Generator(launcher.Settings):
 
         return slides
 
-    def _manageWorkflow(self, slides: pslides.Slides):
+    def _manageWorkflow(self, slides: Slides):
         if self.workflowFile:
             try:
-                return wk.workflow.Workflow(pd.read_csv(
+                return Workflow(pd.read_csv(
                     self.workflowFile), os.path.basename(self.workflowFile)[:-4])
             except FileNotFoundError:
                 launcher.Configuration().error(
@@ -99,21 +99,21 @@ class Generator(launcher.Settings):
         if not slides.getDefaultSlideOrder():
             launcher.Configuration().error('no workflow or slide found')
 
-        return wk.workflow.Workflow(ep.slidesToWorkflow.SlidesToWorkflow().create(slides), 'presentation')
+        return Workflow(ep.SlidesToWorkflow().create(slides), 'presentation')
 
-    def _manageMissingSlides(self, slides: pslides.Slides, workflow: wk.workflow.Workflow):
+    def _manageMissingSlides(self, slides: Slides, workflow: Workflow):
         slides.createMissingSlides(
             [step.stepId for step in workflow.getSteps()])
 
-    def _generate(self, workflow: wk.workflow.Workflow, slides: pslides.Slides):
-        toPres = ep.workflowToPresentation.WorkflowToPresentation(
+    def _generate(self, workflow: Workflow, slides: Slides):
+        toPres = ep.WorkflowToPresentation(
             workflow, slides, self.outputFolder)
 
         presentation = None
         for version in self.versions:
             logging.info('version {} ...'.format(version))
             if self.createFlowchart:
-                wk.flowchart.Flowchart(workflow).display()
+                Flowchart(workflow).display()
             if self.createLinearPresentations:
                 presentation = toPres.createLinearPresentations(version)
             if self.createWorkflowPresentation:
