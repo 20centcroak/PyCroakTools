@@ -1,8 +1,8 @@
 import pathlib
 import logging
 import bisect as bs
-from pycroaktools.presentation import Slide
-from pycroaktools.presentation import SlideGenerator
+from pycroaktools.presentation.slide import Slide
+from pycroaktools.presentation.slideGenerator import SlideGenerator
 from pycroaktools.applauncher import Configuration
 
 

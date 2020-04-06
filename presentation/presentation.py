@@ -1,7 +1,6 @@
 import os
 import logging
-import pycroaktools.workflow.workflow as wk
-import pycroaktools.presentation.slides as pslides
+from pycroaktools.presentation.slides import Slides
 import distutils.dir_util as dirutil
 import distutils.file_util as fileutil
 
@@ -15,7 +14,7 @@ class Presentation:
     Finally this presentation is versioned, it relies on the different slide versions.
     """
 
-    def createPresentation(self, presName, slides: pslides.Slides, slideIds=None, outputFolder=None, links=None, version=0.0, imageFolder=None):
+    def createPresentation(self, presName, slides: Slides, slideIds=None, outputFolder=None, links=None, version=0.0, imageFolder=None):
         """
         save a revealjs presentation in output folder.
         ---
@@ -63,7 +62,7 @@ class Presentation:
             __file__), 'assets', 'reveal.js-3.9.2')
         dirutil.copy_tree(libs, os.path.join(outputFolder, 'libs'))
 
-    def _copyImages(self, slides: pslides.Slides, outputFolder: str):
+    def _copyImages(self, slides: Slides, outputFolder: str):
         logging.info('copying images...')
         output = os.path.join(outputFolder, 'images')
         imageFolders = slides.imageFolders

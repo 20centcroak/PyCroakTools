@@ -1,5 +1,5 @@
 from pycroaktools.presentation import Presentation, Slides
-import pycroaktools.workflow.workflow as wk
+from pycroaktools.workflow import Workflow
 
 
 class WorkflowToPresentation:
@@ -18,7 +18,7 @@ class WorkflowToPresentation:
 
     """
 
-    def __init__(self, workflow: wk.Workflow, slides: Slides, outputFolder):
+    def __init__(self, workflow: Workflow, slides: Slides, outputFolder):
         """
         Builds the object
         ---

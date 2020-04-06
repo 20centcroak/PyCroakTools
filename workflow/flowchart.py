@@ -1,6 +1,6 @@
 import networkx as nx
-import matplotlib.pyplot as py
-import pycroaktools.workflow.workflow as wk
+# import matplotlib.pyplot as py
+from pycroaktools.workflow.workflow import Workflow
 
 
 class Flowchart():
@@ -8,7 +8,7 @@ class Flowchart():
     The Flowchart class makes use of the networkx library to render a Workflow as a graph.
     """
 
-    def __init__(self, workflow: wk.Workflow):
+    def __init__(self, workflow: Workflow):
         """
         Builds the object.
         ---
@@ -31,5 +31,5 @@ class Flowchart():
         for pos in posx:
             nx.draw(self.graph, with_labels=True, node_size=1500,
                     node_color="skyblue", pos=pos)
-            py.title(self.title)
-            py.show()
+            # py.title(self.title)
+            # py.show()

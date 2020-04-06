@@ -6,7 +6,8 @@ import distutils.dir_util as dirutil
 import pycroaktools.applauncher as launcher
 from pycroaktools.presentation import Slides
 from pycroaktools.workflow import Workflow, Flowchart
-import pycroaktools.easyPresentation as ep
+from pycroaktools.easyPresentation.slidesToWorkflow import SlidesToWorkflow
+from pycroaktools.easyPresentation.workflowToPresentation import WorkflowToPresentation
 
 
 class Generator(launcher.Settings):
@@ -99,14 +100,14 @@ class Generator(launcher.Settings):
         if not slides.getDefaultSlideOrder():
             launcher.Configuration().error('no workflow or slide found')
 
-        return Workflow(ep.SlidesToWorkflow().create(slides), 'presentation')
+        return Workflow(SlidesToWorkflow().create(slides), 'presentation')
 
     def _manageMissingSlides(self, slides: Slides, workflow: Workflow):
         slides.createMissingSlides(
             [step.stepId for step in workflow.getSteps()])
 
     def _generate(self, workflow: Workflow, slides: Slides):
-        toPres = ep.WorkflowToPresentation(
+        toPres = WorkflowToPresentation(
             workflow, slides, self.outputFolder)
 
         presentation = None

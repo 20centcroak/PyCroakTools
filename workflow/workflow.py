@@ -1,7 +1,8 @@
 import logging
 import pandas as pd
-from pycroaktools.workflow import Step
-from pycroaktools.applauncher.configuration import Configuration
+from pycroaktools.applauncher import Configuration
+from pycroaktools.workflow.step import Step
+
 
 
 class Workflow:

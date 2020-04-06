@@ -1,7 +1,7 @@
 import logging
 import os.path as path
 import re
-import pycroaktools.presentation.slide as pslide
+from pycroaktools.presentation.slide import Slide
 
 
 class SlideGenerator:
@@ -86,7 +86,7 @@ class SlideGenerator:
         if not self._formatAndCheck(details):
             return None
 
-        slide = pslide.Slide(details['id'], details['title'],
+        slide = Slide(details['id'], details['title'],
                       details['part'], details['version'], isImage=isImage)
         slide.associateFile(file)
         return slide
