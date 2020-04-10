@@ -1,7 +1,6 @@
-import logging
-import os
-import webbrowser
-import pandas as pd
+import os, sys, logging
+from webbrowser import open as webopen
+from pandas import read_csv
 import distutils.dir_util as dirutil
 import pycroaktools.applauncher as launcher
 from pycroaktools.presentation import Slides
@@ -46,8 +45,8 @@ class Generator(launcher.Settings):
         - displayTitles: if true, each slide displays its title
         """
 
-        self.slideFolder = 'slides'
-        self.imageFolder = 'images'
+        self.slideFolder = None
+        self.imageFolder = None
         self.outputFolder = os.getcwd()
         self.workflowFile = None
         self.versions = [0.]
@@ -71,12 +70,15 @@ class Generator(launcher.Settings):
         if not filename:
             return
         new = 2
-        url = "file:///"+filename
-        webbrowser.open(url, new=new)
+        logging.info('presentation available at {}'.format(filename))
+        url = "file:///"+os.path.realpath(filename)
+        logging.info('opening presentation at url {}'.format(url))
+        webopen(url, new=new)
 
     def _manageImages(self, slides: Slides):
         if not self.imageFolder:
             return
+        print(self.imageFolder)
         slides.catalog(self.imageFolder, images=True)
 
     def _manageSlides(self):
@@ -91,14 +93,13 @@ class Generator(launcher.Settings):
     def _manageWorkflow(self, slides: Slides):
         if self.workflowFile:
             try:
-                return Workflow(pd.read_csv(
+                return Workflow(read_csv(
                     self.workflowFile), os.path.basename(self.workflowFile)[:-4])
             except FileNotFoundError:
-                launcher.Configuration().error(
-                    'file {} not found'.format(self.workflowFile))
+                launcher.error('file {} not found'.format(self.workflowFile))
 
         if not slides.getDefaultSlideOrder():
-            launcher.Configuration().error('no workflow or slide found')
+            launcher.error('no workflow or slide found')
 
         return Workflow(SlidesToWorkflow().create(slides), 'presentation')
 

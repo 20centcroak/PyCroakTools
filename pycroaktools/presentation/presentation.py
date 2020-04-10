@@ -1,5 +1,4 @@
-import os
-import logging
+import os, sys, logging
 from pycroaktools.presentation.slides import Slides
 import distutils.dir_util as dirutil
 import distutils.file_util as fileutil
@@ -38,9 +37,8 @@ class Presentation:
 
         file = os.path.join(outputFolder, presName)
 
-        dir = os.path.dirname(__file__)
-        asset1 = os.path.join(dir, 'assets', 'firstPart.txt')
-        asset2 = os.path.join(dir, 'assets', 'secondPart.txt')
+        asset1 = self.resource_path(os.path.join('assets', 'firstPart.txt'))
+        asset2 = self.resource_path(os.path.join('assets', 'secondPart.txt'))
 
         if not slideIds:
             slideIds = slides.getDefaultSlideOrder()
@@ -56,10 +54,14 @@ class Presentation:
 
         return file
 
+    def resource_path(self, relative_path):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(base_path, relative_path)
+
     def _copyLibs(self, outputFolder):
         logging.info('copying libs...')
-        libs = os.path.join(os.path.dirname(
-            __file__), 'assets', 'reveal.js-3.9.2')
+        libs = self.resource_path(os.path.join('assets', 'reveal.js-3.9.2'))
         dirutil.copy_tree(libs, os.path.join(outputFolder, 'libs'))
 
     def _copyImages(self, slides: Slides, outputFolder: str):
@@ -72,6 +74,8 @@ class Presentation:
                     self._copyImage(
                         slides.slides[slideId][version][part], output)
         for folder in imageFolders:
+            print(folder)
+            print(output)
             dirutil.copy_tree(folder, output, update=True)
 
     def _copyImage(self, slide, output):

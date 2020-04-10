@@ -1,2 +1,0 @@
-from pycroaktools.applauncher.configuration import Configuration
-from pycroaktools.applauncher.settings import Settings

@@ -1,5 +1,5 @@
 from pycroaktools.presentation import Slides
-import pandas as pd
+from pandas import DataFrame
 
 
 class SlidesToWorkflow:
@@ -23,5 +23,5 @@ class SlidesToWorkflow:
                  for index, id in enumerate(slideIds) if index < len(slideIds)-1]
         nexts.append('')
 
-        return pd.DataFrame(
+        return DataFrame(
             {'stepId': slideIds, 'title': titles, 'nexts': nexts})

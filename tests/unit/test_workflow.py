@@ -1,6 +1,6 @@
 import unittest
-import os
-import pandas as pd
+import os.path as path
+from pandas import read_csv, DataFrame
 
 from pycroaktools.workflow import Workflow
 from pycroaktools.workflow import Step
@@ -8,10 +8,10 @@ from pycroaktools.workflow import Step
 
 class TestWorkflow(unittest.TestCase):
 
-    test_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources/test_workflow')
+    test_folder = path.join(path.dirname(path.abspath(__file__)), 'resources/test_workflow')
 
     def test_workflow(self):
-        data = pd.read_csv(os.path.join(self.test_folder, 'workflow.csv'))
+        data = read_csv(path.join(self.test_folder, 'workflow.csv'))
         workflow = Workflow(data, 'myWorkflow')
         paths = workflow.getAllPaths()
         self.assertEqual(len(paths), 4)
@@ -30,7 +30,7 @@ class TestWorkflow(unittest.TestCase):
         
         stepId =[1,2,3,4]
         nexts = [2,3,4,None]
-        data = pd.DataFrame({'stepId':stepId, 'nexts':nexts})
+        data = DataFrame({'stepId':stepId, 'nexts':nexts})
 
         workflow = Workflow(data, 'myWorkflow')
         paths = workflow.getAllPaths()

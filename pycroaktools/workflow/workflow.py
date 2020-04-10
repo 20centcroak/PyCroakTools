@@ -1,6 +1,6 @@
-import logging
-import pandas as pd
-from pycroaktools.applauncher import Configuration
+import logging, sys
+from pandas import DataFrame
+from pycroaktools.applauncher import Configuration, error
 from pycroaktools.workflow.step import Step
 
 
@@ -25,7 +25,7 @@ class Workflow:
     But, as we can see, there is no need to define a continuous suite and the identifiers don't need to be sorted. 
     """
 
-    def __init__(self, workflow: pd.DataFrame, name='workflow'):
+    def __init__(self, workflow: DataFrame, name='workflow'):
         """
         builds the class according to the pandas definition of the workflow and optionally its name.
         Parameters
@@ -44,7 +44,7 @@ class Workflow:
         self._findFirsts()
         self._order = self._getStepOrder()
 
-    def _build(self, workflow: pd.DataFrame):
+    def _build(self, workflow: DataFrame):
 
         self._checkData(workflow)
 
@@ -52,8 +52,8 @@ class Workflow:
             try:
                 stepId = int(stepId)
             except ValueError:
-                Configuration().error(
-                    'Workflow definition error - step id {} is not an integer'.format(stepId))
+                error('Workflow definition error - step id {} is not an integer'.format(stepId))
+
             step = Step(stepId, workflow.title[index])
             self.steps[stepId] = step
 
@@ -66,19 +66,20 @@ class Workflow:
                 except ValueError:
                     if not nextStep or nextStep == 'nan':
                         continue
-                    Configuration().error(
-                        'Workflow definition error - next value {} is not an integer'.format(nextStep))
+                    error('Workflow definition error - next value {} is not an integer'.format(nextStep))
                 try:
                     self.steps[stepId].addNext(self.steps[nextStep])
                 except KeyError:
-                    Configuration().error(
-                        'Workflow definition error - step {0} points to step {1} but no definition for step {1}'.format(stepId, nextStep))
+                    error('Workflow definition error - step {0} points to step {1} but no definition for step {1}'.format(stepId, nextStep))
 
-    def _checkData(self, workflow: pd.DataFrame):
+
+    def _checkData(self, workflow: DataFrame):
         if 'stepId' not in workflow:
-            Configuration().error('Workflow definition error - no column named stepId')
+            error('Workflow definition error - no column named stepId')
+
         if 'nexts' not in workflow:
-            Configuration().error('Workflow definition error - no column named nexts')
+            error('Workflow definition error - no column named nexts')
+
         if 'title' in workflow:
             return
 

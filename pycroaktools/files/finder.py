@@ -109,7 +109,11 @@ class Finder(Settings):
     def _recursiveFindFolders(self, callback, sep=os.path.sep):
         folders = []
         flags = 0 if self.caseSensitive else re.IGNORECASE
-        compiled = re.compile(self.regex, flags)
+        try:
+            compiled = re.compile(self.regex, flags)
+        except:
+            logging.error('wrong regex search')
+            return
         for dirpath, subdirs, _ in callback(self.parent):
             logging.info('processing folder {}'.format(dirpath))
             founds = [subdir for subdir in subdirs if compiled.search(subdir)]

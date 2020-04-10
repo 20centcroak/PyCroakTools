@@ -1,9 +1,9 @@
-import pathlib
-import logging
+from pathlib import Path
+import logging, sys
 import bisect as bs
 from pycroaktools.presentation.slide import Slide
 from pycroaktools.presentation.slideGenerator import SlideGenerator
-from pycroaktools.applauncher import Configuration
+from pycroaktools.applauncher import Configuration, error
 
 
 class Slides:
@@ -47,7 +47,7 @@ class Slides:
         if images:
             self.declareResources(folder)
 
-        path = pathlib.Path(folder).rglob('*.*')
+        path = Path(folder).rglob('*.*')
         files = [x for x in path if x.is_file()]
         counter = 0
         for file in files:
@@ -143,7 +143,7 @@ class Slides:
         try:
             return slide[part]
         except KeyError:
-            Configuration().error("part {} not found for slide {}".format(part, slideId))
+            error("part {} not found for slide {}".format(part, slideId))
 
         return self.slides[version][slideId][part]
 
