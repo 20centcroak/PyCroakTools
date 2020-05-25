@@ -3,22 +3,37 @@ import logging, os, time, sys
 
 
 class Configuration:
+    """
+    The Configuration class defines a standard configuration.
+    It defines a default logger for both logs in file and in the console.
+    It also manages the settings given in a yml file. This yml file should be either in the same folder 
+    than the main file (file with the __main__ method) or in a subfolder resources/folder where folder has the name 
+    of the setting file.
+    """
 
     def __init__(self):
-        self.defaultLogger()
+        self._defaultLogger()
 
-    def default(self, file):        
+    def settings(self, file):
+        """
+        get settings from file. It also prints the settings in the logger.
+        Parameters
+        ----------
+        file: either the yml file defining the settings or a py file from which the settings file is deducted
+        by changing the extension with yml and looking into the same folder or the folder resource/name
+        wher name is the name of the file without extension
+         """     
         if not file:
             return
-        fileyml = self.getYml(file)
+        fileyml = self._getYml(file)
         if not fileyml:
             logging.info('config file not found, no config loaded')
             return
-        return self.appConfig(fileyml)
+        return self._appConfig(fileyml)
 
 
-    def getYml(self, file):
-        file = self.getCorrectExtension(file)
+    def _getYml(self, file):
+        file = self._getCorrectExtension(file)
         if os.path.isfile(file):
             return file
         filepath, file_extension = os.path.splitext(file)
@@ -28,13 +43,13 @@ class Configuration:
         if os.path.isfile(resource):
             return resource
         
-    def getCorrectExtension(self, file):
+    def _getCorrectExtension(self, file):
         filename, file_extension = os.path.splitext(file)
         if file_extension in ['yml', 'yaml']:
             return file
         return filename+'.yml'
 
-    def appConfig(self, filename):
+    def _appConfig(self, filename):
         try:
             with open(filename, encoding='utf8') as file:
                 logging.info('config {} loaded'.format(filename))
@@ -47,7 +62,7 @@ class Configuration:
                 'file {} not found, no config loaded'.format(filename))
             return
 
-    def defaultLogger(self):
+    def _defaultLogger(self):
         root = logging.getLogger()
         formatter = logging.Formatter(
             '%(asctime)s - %(levelname)s - %(filename)s - %(lineno)d - %(message)s')

@@ -7,15 +7,12 @@ Search is based on regex.
 Many options are available to stop or continue search when a file or folder is found.
 
 """
+import logging, os, re
 from ftplib import FTP
-from pathlib import Path
 from datetime import datetime
 from zipfile import ZipFile
+from pathlib import Path
 from pycroaktools.applauncher import Settings
-import logging
-import os
-import re
-
 
 class Finder(Settings):
     """
@@ -23,12 +20,12 @@ class Finder(Settings):
     It inherits from pycroaktools.applauncher.settings.Settings that manages the settings.
     """
 
-    def __init__(self, settings: dict):
+    def __init__(self, settings: Settings=None):
         """
-        builds the class according to the settings dictionary.
+        builds the class according to the settings definition.
         Parameters
         ----------
-        settings : dictionary that may contain the following key and values
+        settings : object that may contain the following key and values
 
         - parent: gives the root directory into which files or folders should be searched. 
         If not set, the current folder (folder from which the script is launched) will be used
@@ -68,8 +65,15 @@ class Finder(Settings):
         self.parent = str(Path(self.parent).resolve()
                           ) if self.parent != '/' else self.parent
         self.initialDepth = 0
+        
+    def getRootFile(self, parent, regex):
+        self.parent = parent
+        self.depth = 0
+        self.caseSensitive = False
+        self.regex = regex
+        return self.findFiles()[0]
 
-    def _recursiveFindFiles(self, callback, sep=os.path.sep):
+    def _findFiles(self, callback, sep=os.path.sep):
         foundFiles = []
         flags = 0 if self.caseSensitive else re.IGNORECASE
         compiled = re.compile(self.regex, flags)
@@ -84,29 +88,29 @@ class Finder(Settings):
                     subdirs.remove(avoidFolder)
         return foundFiles
 
-    def recursiveFindFiles(self):
+    def findFiles(self):
         """
         find files in os directory according to the settings defined when building the Finder object
         """
         self.initialDepth = self.parent.count(os.path.sep)
         logging.info('looking for {} in {}'.format(self.regex, self.parent))
-        return self._recursiveFindFiles(self._walkFile)
+        return self._findFiles(self._walkFile)
 
-    def recursiveFindFilesInFtp(self):
+    def findFilesInFtp(self):
         """
         find files in ftp location according to the settings defined when building the Finder object
         """
         self.initialDepth = self.parent.count('/')
-        return self._recursiveFindFiles(self._walkFTP, sep='/')
+        return self._findFiles(self._walkFTP, sep='/')
 
-    def recursiveFindFilesInZip(self):
+    def findFilesInZip(self):
         """
         find files in a zip archive according to the settings defined when building the Finder object.
         In this case the "parent" setting should be the zip path
         """
-        return self._recursiveFindFiles(self._walkZip, sep='/')
+        return self._findFiles(self._walkZip, sep='/')
 
-    def _recursiveFindFolders(self, callback, sep=os.path.sep):
+    def _findFolders(self, callback, sep=os.path.sep):
         folders = []
         flags = 0 if self.caseSensitive else re.IGNORECASE
         try:
@@ -129,19 +133,19 @@ class Finder(Settings):
         logging.info('{} folders found'.format(len(folders)))
         return folders
 
-    def recursiveFindFolders(self):
+    def findFolders(self):
         """
         find folders in the os directory according to the settings defined when building the Finder object
         """
         self.initialDepth = self.parent.count(os.path.sep)
-        return self._recursiveFindFolders(self._walkFile)
+        return self._findFolders(self._walkFile)
 
-    def recursiveFindFolderInFtp(self):
+    def findFolderInFtp(self):
         """
         find folders in the ftp location according to the settings defined when building the Finder object
         """
         self.initialDepth = self.parent.count('/')
-        return self._recursiveFindFolders(self._walkFTP, sep='/')
+        return self._findFolders(self._walkFTP, sep='/')
 
     def _walkFile(self, path):
         for root, dirs, files in os.walk(path):
@@ -211,4 +215,4 @@ class Finder(Settings):
         yield path, dirs, nondirs
         for name in dirs:
             yield from self._walkFTP(path+'/'+name)
-            self.ftpConnection.cwd('..')
+            self.ftpConnection.cwd('.')
