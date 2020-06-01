@@ -71,7 +71,10 @@ class Finder(Settings):
         self.depth = 0
         self.caseSensitive = False
         self.regex = regex
-        return self.findFiles()[0]
+        files = self.findFiles()
+        if files is None:
+            return None
+        return files[0]
 
     def _findFiles(self, callback, sep=os.path.sep):
         foundFiles = []

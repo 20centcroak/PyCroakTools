@@ -121,30 +121,33 @@ class Word:
         table: empty python-docx table
         header: list of header names
         '''
-        table.add_row().cells
+        if not table.rows:
+            table.add_row().cells
         headercells = table.rows[0].cells
         for colindex, cell in enumerate(headercells):
             cell.text = str(header[colindex])
 
-    def fillTableWithData(self, table, data: DataFrame):
+    def fillTableWithData(self, table, data: DataFrame, from_row: int=0):
         '''fill the given table with the associated data
         Parameters
         ----------
         table: python-docx table to fill in
         data: pandas Dataframe with the same column number et names than the table to fill in
+        from_row: start filling at this given row index (first row is from_row=0)
         '''
         table.autofit = True
+        table.style = 'Table Grid'
 
+        count = from_row
         for _, row in data.iterrows():
-            row_cells = table.add_row().cells
+            if count <= len(table.rows)-1:
+                row_cells = table.rows[count].cells
+            else:
+                row_cells = table.add_row().cells
+            count+=1
             for colindex, cell in enumerate(row_cells):
                 if colindex < len(row):
                     cell.text = str(row[colindex])
-
-        # for index in range(0, len(data)):
-        #     row_cells = table.add_row().cells
-        #     for colindex, cell in enumerate(row_cells):
-        #         cell.text = str(data[colindex][index])
 
     def save(self, filename: str):
         '''save the document

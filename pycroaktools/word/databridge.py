@@ -26,15 +26,17 @@ class DataBridge:
         table = self.doc.findTableByKeyword(keyword)
         if not table:
             raise ValueError('no table found with keyword {}'.format(keyword))
-        self.doc.dropTableContent(table)
-
+        
         df = self.pack[replacement]
         if header is not None:
             self.doc.addTableHeader(table, header)
             df = df.loc[1:]
 
         df.columns = range(0, df.shape[1])
-        self.doc.fillTableWithData(table, df)
+
+        from_row = 1 if 'header' in parameters else 0
+
+        self.doc.fillTableWithData(table, df, from_row)
 
 
     def replaceWithString(self, keyword: str, parameters: dict):

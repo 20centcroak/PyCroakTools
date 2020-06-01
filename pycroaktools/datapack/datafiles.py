@@ -1,6 +1,7 @@
 from pycroaktools.files import Finder
 from pycroaktools.datapack import DataPack
 from tkinter import Tk, filedialog
+import logging
 
 
 class DataFiles:
@@ -35,12 +36,14 @@ class DataFiles:
             for name in settings['files']:
                 finder_settings['regex'] = settings['files'][name]
                 self.files[name] = self._getFile(finder_settings)
+                logging.info('file {} found'.format(self.files[name]))
 
         self.fileset = dict()
         if 'fileset' in settings:
             for name in settings['fileset']:
                 finder_settings['regex'] = settings['fileset'][name]
                 self.fileset[name] = self._getFiles(finder_settings)
+                logging.info('fileset: {}'.format(self.fileset[name]))
 
         if 'externalfiles' in settings:
             for name in settings['externalfiles']:
@@ -51,10 +54,12 @@ class DataFiles:
                         ('searched files', parameters['type']), ('all files', '.*')]
                     self.files[name] = self._openDialog(
                         filetypes=filetypes, title=tip)
+                    logging.info('file {} selected'.format(self.files[name]))
                 else:
                     finder_settings['parent'] = ['in']
                     finder_settings['regex'] = parameters['ref']
                     self.files[name] = self._getFile(finder_settings)
+                    logging.info('file {} found'.format(self.files[name]))
 
     def _openDialog(self, title='open', filetypes=None):
         root = Tk()

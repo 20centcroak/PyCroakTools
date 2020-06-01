@@ -1,4 +1,5 @@
 import re
+import ntpath
 import logging
 from os.path import splitext
 from math import ceil
@@ -44,21 +45,37 @@ class DataPack:
             parameters:
                 data: data2
                 fillwith: ""
+
+            processing: filename
+            output: file1name
+            parameters:
+                file: file1
+
+            processing: format
+            output: data2
+            parameters:
+                data: data2
+                regex: (^.+-[0-9]+)
         """
         self.pack = dict()
         self.files = files
 
         switcher = {'dataframe': self.getDataFrame, 'fillna': self.fillna,
-                    'split': self.splitDataFrame, 'replaceValues': self.replaceValues, 'table': self.formatDataframe}
+                    'split': self.splitDataFrame, 'replaceValues': self.replaceValues, 'table': self.formatDataframe, 'filename':self.filename, 'format': self.format}
 
         for processing in dataprocessing:
+            logging.info("applying processing {}".format(processing['processing']))
             self.pack[processing['output']] = switcher[processing['processing']](
                 processing['parameters'])
+            logging.info("data {} generated".format(processing['output']))
 
     def getDataFrame(self, parameters: dict):
         sep = parameters['sep'] if 'sep' in parameters else ','
         skip = parameters['skip'] if 'skip' in parameters else None
         filename = parameters['file']
+
+        logging.info("file {} processed".format(filename))
+
         file = self.files[filename]
         logging.info('retrieving data from {}'.format(file))
         _, extension = splitext(file)
@@ -77,6 +94,9 @@ class DataPack:
 
     def splitDataFrame(self, parameters: dict):
         data = self.pack[parameters['data']]
+
+        logging.info("data {} to be processed".format(parameters['data']))
+
         cols = parameters['cols']
         nb_of_rows = len(data)
         nb_per_row = ceil(nb_of_rows/cols)
@@ -93,6 +113,7 @@ class DataPack:
         return concat(series, axis=1)
 
     def replaceValues(self, parameters: dict):
+        logging.info("data {} processed".format(parameters['data']))
         return self.pack[parameters['data']].replace(parameters['search'], parameters['replace'])
 
     def formatDataframe(self, parameters: dict):
@@ -120,3 +141,16 @@ class DataPack:
 
     def fillna(self, parameters: dict):
         return self.pack[parameters['data']].fillna(parameters['fillwith'])
+
+    def filename(self, parameters: dict):
+        file = parameters['file']
+        head, tail = ntpath.split(self.files[file])
+        return tail or ntpath.basename(head)
+
+    def format(self, parameters: dict):
+        regex = parameters['regex']
+        df = self.pack[parameters['data']]
+
+        logging.info("data {} to be processed".format(parameters['data']))
+        return df.replace({regex: r'\1'}, regex=True)
+
