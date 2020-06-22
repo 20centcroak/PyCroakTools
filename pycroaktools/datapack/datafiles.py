@@ -2,6 +2,7 @@ from pycroaktools.files import Finder
 from pycroaktools.datapack import DataPack
 from tkinter import Tk, filedialog
 import logging
+import os
 
 
 class DataFiles:
@@ -41,7 +42,11 @@ class DataFiles:
         self.fileset = dict()
         if 'fileset' in settings:
             for name in settings['fileset']:
-                finder_settings['regex'] = settings['fileset'][name]
+                if type(settings['fileset'][name]) is dict:
+                     finder_settings['regex'] = settings['fileset'][name]['regex']
+                     finder_settings['parent'] = os.path.join(parent, settings['fileset'][name]['subfolder'])
+                else:
+                    finder_settings['regex'] = settings['fileset'][name]
                 self.fileset[name] = self._getFiles(finder_settings)
                 logging.info('fileset: {}'.format(self.fileset[name]))
 
@@ -69,6 +74,7 @@ class DataFiles:
         return filepath
 
     def _getFiles(self, finder_settings):
+        finder_settings['stopWhenFound'] = False
         foundfiles = Finder(finder_settings).findFiles()
         if not foundfiles:
             raise ValueError('no file found in {} with regex {}'.format(

@@ -1,17 +1,28 @@
-import fiona
-import json
+# from fiona import open as fionaopen
+# import json
+
+import shapefile
+
 
 class Shape:
-
-    def __init__(self, filename):
-        self.filename = filename
     
-    def getRecordByFieldName(self, fieldName: str):
-        values = []
-        with fiona.open(self.filename) as f:
-            self.records = f.values()
-            for record in self.records:
-                values.append(record['properties'][fieldName])
-        return values
+    def getRecordByFieldName(self, filename: str, fieldName: str):
+        # values = []
+        # with fionaopen(filename) as f:
+        #     records = f.values()
+        #     for record in records:
+        #         values.append(record['properties'][fieldName])
+        # return values
+        shape = shapefile.Reader(filename)
+        records = shape.records()
+        #first feature of the shapefile
+        names = [x[0] for x in records]
+        return names
+        # records = shape.records()
+        # for record in records:
+        #     print(record)
+        # feature = shape.shapeRecords()[0]
+        # first = feature.shape. 
+        # print(first)
 
     
