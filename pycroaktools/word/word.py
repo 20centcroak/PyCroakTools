@@ -132,7 +132,7 @@ class Word:
         Parameters
         ----------
         table: python-docx table to fill in
-        data: pandas Dataframe with the same column number et names than the table to fill in
+        data: pandas Dataframe with the same column number and names than the table to fill in
         from_row: start filling at this given row index (first row is from_row=0)
         '''
         table.autofit = True
@@ -140,11 +140,13 @@ class Word:
 
         count = from_row
         for _, row in data.iterrows():
+
             if count <= len(table.rows)-1:
                 row_cells = table.rows[count].cells
             else:
                 row_cells = table.add_row().cells
             count+=1
+
             for colindex, cell in enumerate(row_cells):
                 if colindex < len(row):
                     cell.text = str(row[colindex])

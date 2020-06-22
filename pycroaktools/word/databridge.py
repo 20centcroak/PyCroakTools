@@ -30,7 +30,6 @@ class DataBridge:
         df = self.pack[replacement]
         if header is not None:
             self.doc.addTableHeader(table, header)
-            df = df.loc[1:]
 
         df.columns = range(0, df.shape[1])
 
@@ -40,7 +39,7 @@ class DataBridge:
 
 
     def replaceWithString(self, keyword: str, parameters: dict):
-        self.doc.replaceKeyword(keyword, self.pack[parameters['replacement']])
+        self.doc.replaceKeyword(keyword, str(self.pack[parameters['replacement']]))
 
 
     def replaceWithDate(self, keyword: str, parameters: dict):
