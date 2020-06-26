@@ -61,7 +61,7 @@ class DataFiles:
                         filetypes=filetypes, title=tip)
                     logging.info('file {} selected'.format(self.files[name]))
                 else:
-                    finder_settings['parent'] = ['in']
+                    finder_settings['parent'] = parameters['in']
                     finder_settings['regex'] = parameters['ref']
                     self.files[name] = self._getFile(finder_settings)
                     logging.info('file {} found'.format(self.files[name]))
