@@ -56,25 +56,18 @@ class DataPack:
             parameters:
                 data: data2
                 regex: (^.+-[0-9]+)
-
-            processing: filter
-            output: data2
-            parameters:
-                data: data1
-                regex: (^.+-[0-9]+)
         """
         self.pack = dict()
         self.files = files
 
         switcher = {'dataframe': self.getDataFrame, 'fillna': self.fillna,
-                    'split': self.splitDataFrame, 'replaceValues': self.replaceValues, 'table': self.formatDataframe, 'filename':self.filename, 'format': self.format, 'filter': self.filter}
+                    'split': self.splitDataFrame, 'replaceValues': self.replaceValues, 'table': self.formatDataframe, 'filename':self.filename, 'format': self.format}
 
         for processing in dataprocessing:
             logging.info("applying processing {}".format(processing['processing']))
             self.pack[processing['output']] = switcher[processing['processing']](
                 processing['parameters'])
             logging.info("data {} generated".format(processing['output']))
-            
 
     def getDataFrame(self, parameters: dict):
         sep = parameters['sep'] if 'sep' in parameters else ','
@@ -111,8 +104,8 @@ class DataPack:
         series = []
 
         for col in range(0, cols):
-            min_range = col*(nb_per_row+1)
-            max_range = min(min_range+nb_per_row, nb_of_rows)
+            min_range = col*nb_per_row
+            max_range = min(min_range+nb_per_row-1, nb_of_rows-1)
             df = data.loc[min_range:max_range]
             df = df.reset_index(drop=True)
             series.append(df)
@@ -161,14 +154,3 @@ class DataPack:
         logging.info("data {} to be processed".format(parameters['data']))
         return df.replace({regex: r'\1'}, regex=True)
 
-    
-    def filter(self, parameters: dict):
-        regex = parameters['regex']
-        df = self.pack[parameters['data']]
-
-        for col in df.columns:
-            df = df.loc[df[col].str.contains(regex)]
-
-        logging.info("data {} to be processed".format(parameters['data']))
-
-        return df.replace({regex: r'\1'}, regex=True)
