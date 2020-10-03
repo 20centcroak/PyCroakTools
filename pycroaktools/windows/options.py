@@ -25,6 +25,10 @@ class Options(Settings):
         self.excludemodules = []
         self.package = None
         self.no_confirm = True
+        self.version = None
+        self.sh = None
+        self.bat = None
+
 
         self.setProperties(settings)
 
@@ -36,4 +40,3 @@ class Options(Settings):
 
     def addPath(self, path):
         self.paths.append(path)
-

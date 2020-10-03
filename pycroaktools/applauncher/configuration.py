@@ -1,5 +1,6 @@
 from yaml import safe_load
 import logging, os, time, sys
+import re
 
 
 class Configuration:
@@ -11,7 +12,8 @@ class Configuration:
     of the setting file.
     """
 
-    def __init__(self):
+    def __init__(self, loggerfolder='logs/'):
+        self.loggerfolder = loggerfolder
         self._defaultLogger()
 
     def settings(self, file):
@@ -22,13 +24,15 @@ class Configuration:
         file: either the yml file defining the settings or a py file from which the settings file is deducted
         by changing the extension with yml and looking into the same folder or the folder resource/name
         wher name is the name of the file without extension
-         """     
+         """ 
+        logging.info('get settings in yml file')
         if not file:
             return
         fileyml = self._getYml(file)
         if not fileyml:
             logging.info('config file not found, no config loaded')
             return
+        logging.info('settings file : {}'.format(fileyml))
         return self._appConfig(fileyml)
 
 
@@ -51,9 +55,12 @@ class Configuration:
 
     def _appConfig(self, filename):
         try:
-            with open(filename, encoding='utf8') as file:
+            with open(filename, 'r', encoding='utf8') as file:
                 logging.info('config {} loaded'.format(filename))
-                properties = safe_load(file)
+                text = file.read()
+                properties = safe_load(text)
+                text = self._substitute(text, properties)
+                properties = safe_load(text)
                 for key in properties:
                     logging.info('{}:{}'.format(key, properties[key]))
                 return properties
@@ -75,7 +82,7 @@ class Configuration:
         root.addHandler(console_handler)
 
         # file
-        dirName = 'logs/'
+        dirName = self.loggerfolder
         if not os.path.exists(dirName):
             os.makedirs(dirName)
         filename = os.path.join(dirName, str(time.time())+'.log')
@@ -83,4 +90,17 @@ class Configuration:
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
         root.addHandler(file_handler)
+
+    def _substitute(self, text, properties):
+        items = re.search('(\{.*\})', text)
+        if not items:
+            return text
+        for group in items.groups():
+            replacement = group[1:-1]
+            if replacement not in properties:
+                logging.warning('no replacement found for {}'.format(replacement))
+            else:
+                text = text.replace(group, str(properties[replacement]))
+        return text
+
         
